@@ -59,13 +59,17 @@ const features = [
 
 const connectors = [
   { name: "SSL", ready: true },
-  { name: "WHOIS", ready: false },
-  { name: "DNS", ready: false },
-  { name: "Cloudflare", ready: false },
-  { name: "PageSpeed", ready: false },
-  { name: "UptimeRobot", ready: false },
-  { name: "GA4", ready: false },
-  { name: "GitHub Actions", ready: false },
+  { name: "WHOIS", ready: true },
+  { name: "DNS", ready: true },
+  { name: "GoDaddy", ready: true },
+  { name: "Namecheap", ready: true },
+  { name: "Cloudflare", ready: true },
+  { name: "PageSpeed", ready: true },
+  { name: "UptimeRobot", ready: true },
+  { name: "GA4", ready: true },
+  { name: "GitHub", ready: true },
+  { name: "Vercel", ready: true },
+  { name: "AWS Cost", ready: true },
 ];
 
 const steps = [
