@@ -70,9 +70,13 @@ const connectors = [
   { name: "PageSpeed", ready: true },
   { name: "UptimeRobot", ready: true },
   { name: "GA4", ready: true },
+  { name: "Plausible", ready: true },
   { name: "GitHub", ready: true },
   { name: "Vercel", ready: true },
+  { name: "Netlify", ready: true },
+  { name: "Sentry", ready: true },
   { name: "AWS Cost", ready: true },
+  { name: "Stripe", ready: true },
 ];
 
 const steps = [
