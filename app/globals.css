@@ -13,6 +13,12 @@
   --text-muted: #5b6b66;
 }
 
+html {
+  /* Anchor offset so native hash jumps clear the sticky header. Smooth
+     animation is handled in JS (SmoothScroll) for reliable cross-env behavior. */
+  scroll-padding-top: 5rem;
+}
+
 html,
 body {
   background-color: var(--bg);

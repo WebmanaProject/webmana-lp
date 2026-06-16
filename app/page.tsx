@@ -235,6 +235,103 @@ function Logo({ className = "" }: { className?: string }) {
   );
 }
 
+/**
+ * Smooth in-page scrolling for hash links. Native `scroll-behavior: smooth` is
+ * unreliable in some environments, so we animate with rAF (instant per-frame
+ * scroll, which always works) and offset for the sticky header.
+ */
+function SmoothScroll() {
+  useEffect(() => {
+    const OFFSET = 80; // sticky header height + breathing room
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function animateTo(targetY: number) {
+      const startY = window.scrollY;
+      const dist = targetY - startY;
+      // Jump instantly when motion is reduced, the distance is tiny, or the tab
+      // is hidden (rAF is paused for hidden tabs, so the animation can't run).
+      if (prefersReduced || document.hidden || Math.abs(dist) < 4) {
+        window.scrollTo({ top: targetY, behavior: "instant" as ScrollBehavior });
+        return;
+      }
+      const duration = Math.min(900, Math.max(300, Math.abs(dist) * 0.5));
+      const ease = (t: number) => 1 - Math.pow(1 - t, 3); // easeOutCubic
+      let start: number | null = null;
+      function step(ts: number) {
+        if (start === null) start = ts;
+        const p = Math.min(1, (ts - start) / duration);
+        // Force "instant" per frame so a global smooth scroll-behavior can't
+        // turn each step into its own (broken) animation.
+        window.scrollTo({ top: Math.round(startY + dist * ease(p)), behavior: "instant" as ScrollBehavior });
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    function onClick(e: MouseEvent) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return;
+      const target = e.target as HTMLElement | null;
+      const link = target?.closest('a[href^="#"]') as HTMLAnchorElement | null;
+      if (!link) return;
+      const id = link.getAttribute("href")?.slice(1);
+      if (!id) return;
+      const el = document.getElementById(id);
+      if (!el) return;
+      e.preventDefault();
+      const targetY = Math.max(0, el.getBoundingClientRect().top + window.scrollY - OFFSET);
+      animateTo(targetY);
+      history.pushState(null, "", `#${id}`);
+    }
+
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
+
+  return null;
+}
+
+/** GitHub "Star" button showing the live stargazer count (fetched client-side). */
+function GitHubStars() {
+  const [stars, setStars] = useState<number | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetch("https://api.github.com/repos/WebmanaProject/webmana")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (active && d && typeof d.stargazers_count === "number") {
+          setStars(d.stargazers_count);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return (
+    <a
+      href={GITHUB_URL}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-2 rounded-2xl border border-border bg-surface px-3.5 py-2 text-sm font-medium text-text transition hover:border-accent/40 hover:bg-bg-subtle"
+    >
+      <svg viewBox="0 0 16 16" className="h-4 w-4" fill="currentColor" aria-hidden>
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z" />
+      </svg>
+      <span>Star</span>
+      {stars !== null && (
+        <span className="flex items-center gap-1 rounded-md border border-border bg-bg-subtle px-1.5 py-0.5 text-xs tabular-nums text-accent-strong">
+          <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor" aria-hidden>
+            <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
+          </svg>
+          {stars}
+        </span>
+      )}
+    </a>
+  );
+}
+
 function Nav() {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-bg/80 backdrop-blur">
@@ -250,14 +347,16 @@ function Nav() {
           <a href="#connectors" className="hover:text-text">Connectors</a>
           <a href="#mcp" className="hover:text-text">MCP</a>
           <a href={DOCS_URL} className="hover:text-text">Docs</a>
-          <a href={GITHUB_URL} className="hover:text-text">GitHub</a>
         </div>
-        <a
-          href={GITHUB_URL}
-          className="rounded-2xl bg-accent px-4 py-2 text-sm font-medium text-accent-ink transition hover:brightness-95"
-        >
-          Get started
-        </a>
+        <div className="flex items-center gap-3">
+          <GitHubStars />
+          <a
+            href="#self-host"
+            className="rounded-2xl bg-accent px-4 py-2 text-sm font-medium text-accent-ink transition hover:brightness-95"
+          >
+            Get started
+          </a>
+        </div>
       </nav>
     </header>
   );
@@ -352,7 +451,7 @@ function Hero() {
           <ScrollReveal direction="up" delay={0} immediate>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-bg-subtle px-4 py-1.5 text-sm text-text-muted">
               <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
-              Self-hosted · Open source · AI-native
+              Open source · 24 built-in connectors
             </span>
           </ScrollReveal>
 
@@ -374,7 +473,7 @@ function Hero() {
           <ScrollReveal direction="up" delay={300} immediate>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a
-                href={GITHUB_URL}
+                href="#self-host"
                 className="rounded-2xl bg-accent px-5 py-3 font-medium text-accent-ink transition hover:brightness-95"
               >
                 Deploy with Docker
@@ -386,12 +485,6 @@ function Hero() {
                 View on GitHub
               </a>
             </div>
-          </ScrollReveal>
-
-          <ScrollReveal direction="up" delay={400} immediate>
-            <code className="mt-6 inline-block rounded-2xl border border-border bg-bg-subtle px-5 py-3 font-mono text-sm">
-              docker compose up
-            </code>
           </ScrollReveal>
         </div>
 
@@ -601,7 +694,7 @@ function Connectors() {
 
 function SelfHosting() {
   return (
-    <section className="mx-auto max-w-6xl px-6 py-20">
+    <section id="self-host" className="mx-auto max-w-6xl px-6 py-20">
       <ScrollReveal direction="up">
         <h2 className="text-3xl font-semibold tracking-tight">Self-host in three steps</h2>
         <p className="mt-3 max-w-2xl text-text-muted">
@@ -734,6 +827,7 @@ export default function Page() {
           }
         `}} />
       </noscript>
+      <SmoothScroll />
       <Nav />
       <Hero />
       <TrustStrip />
