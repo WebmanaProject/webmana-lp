@@ -201,15 +201,38 @@ function ScrollReveal({
   );
 }
 
+/** Webmana logo mark — a hexagon "globe/grid", matching the main app. */
+function Logo({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-hidden fill="none">
+      <path
+        d="M16 2.5 27.7 9.25v13.5L16 29.5 4.3 22.75V9.25L16 2.5Z"
+        fill="rgba(0,255,170,0.14)"
+        stroke="#00b37a"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M16 6.5v19M7.5 11v10M24.5 11v10"
+        stroke="#00b37a"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+      <circle cx="16" cy="16" r="3.1" fill="#00ffaa" stroke="#04261c" strokeWidth="1" />
+    </svg>
+  );
+}
+
 function Nav() {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-bg/80 backdrop-blur">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <a href="#top" className="flex items-center gap-2 font-semibold tracking-tight">
-          <span className="grid h-7 w-7 place-items-center rounded-lg bg-accent text-accent-ink">
-            W
+        <a href="#top" className="flex items-center gap-2.5 font-semibold tracking-tight">
+          <Logo className="h-7 w-7" />
+          <span>
+            Web<span className="text-accent-strong">mana</span>
           </span>
-          Webmana
         </a>
         <div className="hidden items-center gap-7 text-sm text-text-muted md:flex">
           <a href="#features" className="hover:text-text">Features</a>
@@ -672,10 +695,10 @@ function Footer() {
     <footer className="border-t border-border">
       <div className="mx-auto flex flex-col items-center justify-between gap-4 px-6 py-10 text-sm text-text-muted sm:flex-row">
         <span className="flex items-center gap-2">
-          <span className="grid h-6 w-6 place-items-center rounded-md bg-accent text-xs text-accent-ink">
-            W
+          <Logo className="h-6 w-6" />
+          <span>
+            Web<span className="text-accent-strong">mana</span> · webmana.dev
           </span>
-          Webmana · webmana.dev
         </span>
         <div className="flex items-center gap-6">
           <a href="#features" className="hover:text-text">Features</a>

@@ -26,23 +26,24 @@ export default function OpengraphImage() {
         }}
       >
         {/* Brand row */}
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 64,
-              height: 64,
-              borderRadius: 16,
-              background: ACCENT,
-              color: INK,
-              fontSize: 40,
-              fontWeight: 800,
-            }}
-          >
-            W
-          </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <svg width="64" height="64" viewBox="0 0 32 32" fill="none">
+            <path
+              d="M16 2.5 27.7 9.25v13.5L16 29.5 4.3 22.75V9.25L16 2.5Z"
+              fill="rgba(0,255,170,0.18)"
+              stroke={ACCENT}
+              strokeWidth="1.8"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M16 6.5v19M7.5 11v10M24.5 11v10"
+              stroke={ACCENT}
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              opacity="0.6"
+            />
+            <circle cx="16" cy="16" r="3.2" fill={ACCENT} stroke={INK} strokeWidth="1" />
+          </svg>
           <div style={{ fontSize: 34, fontWeight: 700, color: "#ffffff" }}>
             Webmana
           </div>
